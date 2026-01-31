@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BooksOverviewPage } from './books-overview-page';
+import { provideRouter } from '@angular/router';
+import { booksPortalRoutes } from '../books-portal.routes';
+import { RouterTestingHarness } from '@angular/router/testing';
 
 describe('BooksOverviewPage', () => {
   let component: BooksOverviewPage;
@@ -8,7 +11,8 @@ describe('BooksOverviewPage', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BooksOverviewPage]
+      imports: [BooksOverviewPage],
+      providers: [provideRouter(booksPortalRoutes)],
     })
     .compileComponents();
 
@@ -82,5 +86,14 @@ describe('BooksOverviewPage', () => {
     const books = component['filteredBooks']();
 
     expect(books).toHaveLength(0);
+  });
+
+  it('should load the BooksOverviewPage for /books', async () => {
+    const harness = await RouterTestingHarness.create();
+
+    const component = await harness.navigateByUrl('/books', BooksOverviewPage);
+
+    expect(component).toBeTruthy();
+    expect(document.title).toBe('Books');
   });
 });

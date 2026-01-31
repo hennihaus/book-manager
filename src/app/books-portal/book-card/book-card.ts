@@ -1,9 +1,12 @@
 import { Component, input, output } from '@angular/core';
 import { Book } from '../../shared/book';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-book-card',
-  imports: [],
+  imports: [
+    RouterLink
+  ],
   templateUrl: './book-card.html',
   styleUrl: './book-card.css',
 })

@@ -1,9 +1,13 @@
 import { Component } from '@angular/core';
-import { BooksOverviewPage } from './books-portal/books-overview-page/books-overview-page';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [BooksOverviewPage],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive
+  ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

@@ -3,6 +3,7 @@ import { BookCard } from './book-card';
 import { inputBinding, outputBinding, signal } from '@angular/core';
 import { Book } from '../../shared/book';
 import { Mock } from 'vitest';
+import { provideRouter } from '@angular/router';
 
 describe('BookCard', () => {
   let component: BookCard;
@@ -21,7 +22,8 @@ describe('BookCard', () => {
     likeFn = vi.fn();
 
     await TestBed.configureTestingModule({
-      imports: [BookCard]
+      imports: [BookCard],
+      providers: [provideRouter([])]
     })
     .compileComponents();
 
