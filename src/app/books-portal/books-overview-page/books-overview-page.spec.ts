@@ -35,5 +35,21 @@ describe('BooksOverviewPage', () => {
     const articleEls = compiledElement.querySelectorAll('article');
 
     expect(articleEls).toHaveLength(2);
-  })
+  });
+
+  it('should render a BookCard component for each book', () => {
+    const compiledElement: HTMLElement = fixture.nativeElement;
+
+    const bookCardEls = compiledElement.querySelectorAll('app-book-card');
+
+    expect(bookCardEls).toHaveLength(2);
+  });
+
+  it('should correctly pass book data to BookCard components', () => {
+    const compiledElement: HTMLElement = fixture.nativeElement;
+    const bookCardEls = compiledElement.querySelectorAll('app-book-card');
+
+    expect(bookCardEls[0].textContent).toContain('Tierisch gut kochen');
+    expect(bookCardEls[1].textContent).toContain('Backen mit Affen');
+  });
 });
