@@ -4,16 +4,19 @@ import { BookDetailsPage } from './book-details-page';
 import { provideRouter, Router } from '@angular/router';
 import { booksPortalRoutes } from '../books-portal.routes';
 import { BookStore } from '../../shared/book-store';
-import { RouterTestingHarness } from '@angular/router/testing';
 import { provideLocationMocks } from '@angular/common/testing';
 import { Location } from '@angular/common';
+import { inputBinding, signal, WritableSignal } from '@angular/core';
 
 describe('BookDetailsPage', () => {
   let component: BookDetailsPage;
   let fixture: ComponentFixture<BookDetailsPage>;
   let bookStore: BookStore;
+  let isbn: WritableSignal<string>;
 
   beforeEach(async () => {
+    isbn = signal('12345');
+
     await TestBed.configureTestingModule({
       imports: [BookDetailsPage],
       providers: [
@@ -23,7 +26,9 @@ describe('BookDetailsPage', () => {
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(BookDetailsPage);
+    fixture = TestBed.createComponent(BookDetailsPage, {
+      bindings: [inputBinding('isbn', isbn)]
+    });
     component = fixture.componentInstance;
     bookStore = TestBed.inject(BookStore);
     await fixture.whenStable();
@@ -34,13 +39,9 @@ describe('BookDetailsPage', () => {
   });
 
   it('should load the correct book by ISBN', async () => {
-    const harness = await RouterTestingHarness.create();
-    const component = await harness.navigateByUrl('/books/details/12345', BookDetailsPage);
-
     const expectedBook = bookStore.getSingle('12345');
 
     expect(component['book']()).toEqual(expectedBook);
-    expect(document.title).toBe('Book Details');
   });
 
   it('should navigate to the details page', async () => {
@@ -50,5 +51,13 @@ describe('BookDetailsPage', () => {
     await router.navigate(['/books/details/12345']);
 
     expect(location.path()).toBe('/books/details/12345');
-  })
+  });
+
+  it('should update book details when ISBN changes', async () => {
+    isbn.set('67890');
+    await fixture.whenStable();
+
+    const expectedBook = bookStore.getSingle('67890');
+    expect(component['book']()).toEqual(expectedBook);
+  });
 });
