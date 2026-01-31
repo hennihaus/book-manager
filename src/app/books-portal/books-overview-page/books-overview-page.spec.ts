@@ -4,15 +4,31 @@ import { BooksOverviewPage } from './books-overview-page';
 import { provideRouter } from '@angular/router';
 import { booksPortalRoutes } from '../books-portal.routes';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { Book } from '../../shared/book';
+import { BookStore } from '../../shared/book-store';
+import { of } from 'rxjs';
 
 describe('BooksOverviewPage', () => {
   let component: BooksOverviewPage;
   let fixture: ComponentFixture<BooksOverviewPage>;
 
+  const mockBooks: Partial<Book>[] = [
+    { isbn: '1234', title: 'Tierisch gut kochen' },
+    { isbn: '5678', title: 'Backen mit Affen' },
+  ];
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [BooksOverviewPage],
-      providers: [provideRouter(booksPortalRoutes)],
+      providers: [
+        provideRouter(booksPortalRoutes),
+        {
+          provide: BookStore,
+          useValue: {
+            getAll: () => of(mockBooks)
+          }
+        }
+      ],
     })
     .compileComponents();
 

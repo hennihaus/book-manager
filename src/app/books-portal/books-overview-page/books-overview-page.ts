@@ -27,7 +27,9 @@ export class BooksOverviewPage {
   })
 
   constructor() {
-    this.books.set(this.#bookStore.getAll());
+    this.#bookStore.getAll().subscribe((books) => {
+      this.books.set(books);
+    });
   }
 
   addLikedBook(newLikedBook: Book) {

@@ -7,21 +7,36 @@ import { BookStore } from '../../shared/book-store';
 import { provideLocationMocks } from '@angular/common/testing';
 import { Location } from '@angular/common';
 import { inputBinding, signal, WritableSignal } from '@angular/core';
+import { Mock } from 'vitest';
+import { Book } from '../../shared/book';
+import { of } from 'rxjs';
 
 describe('BookDetailsPage', () => {
   let component: BookDetailsPage;
   let fixture: ComponentFixture<BookDetailsPage>;
-  let bookStore: BookStore;
   let isbn: WritableSignal<string>;
+  let getSingleFn: Mock;
+
+  const testBook: Partial<Book> = {
+    isbn: '12345',
+    title: 'Test Book 1',
+  }
 
   beforeEach(async () => {
     isbn = signal('12345');
+    getSingleFn = vi.fn().mockReturnValue(of(testBook));
 
     await TestBed.configureTestingModule({
       imports: [BookDetailsPage],
       providers: [
         provideRouter(booksPortalRoutes),
         provideLocationMocks(),
+        {
+          provide: BookStore,
+          useValue: {
+            getSingle: getSingleFn,
+          }
+        }
       ],
     })
     .compileComponents();
@@ -30,7 +45,6 @@ describe('BookDetailsPage', () => {
       bindings: [inputBinding('isbn', isbn)]
     });
     component = fixture.componentInstance;
-    bookStore = TestBed.inject(BookStore);
     await fixture.whenStable();
   });
 
@@ -39,9 +53,8 @@ describe('BookDetailsPage', () => {
   });
 
   it('should load the correct book by ISBN', async () => {
-    const expectedBook = bookStore.getSingle('12345');
-
-    expect(component['book']()).toEqual(expectedBook);
+    expect(getSingleFn).toHaveBeenCalledExactlyOnceWith('12345');
+    expect(component['book']()).toEqual(testBook);
   });
 
   it('should navigate to the details page', async () => {
@@ -54,10 +67,13 @@ describe('BookDetailsPage', () => {
   });
 
   it('should update book details when ISBN changes', async () => {
+    const anotherBook = { isbn: '67890', title: 'Test Book 2', authors: [] };
+    getSingleFn.mockReturnValue(of(anotherBook))
+
     isbn.set('67890');
     await fixture.whenStable();
 
-    const expectedBook = bookStore.getSingle('67890');
-    expect(component['book']()).toEqual(expectedBook);
+    expect(getSingleFn).toHaveBeenCalledWith('67890');
+    expect(component['book']()).toEqual(anotherBook);
   });
 });
