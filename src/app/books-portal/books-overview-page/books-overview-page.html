@@ -13,7 +13,15 @@
 <section>
   <h1>Books</h1>
   <div>
-    @for (b of books(); track b.isbn) {
+    <input
+      type="search"
+      [value]="searchTerm()"
+      (input)="searchTerm.set($event.target.value)"
+      placeholder="Search"
+      aria-label="Search"
+    />
+
+    @for (b of filteredBooks(); track b.isbn) {
       <app-book-card [book]="b" (like)="addLikedBook($event)" />
     }
   </div>
