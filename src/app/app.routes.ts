@@ -1,11 +1,14 @@
 import { Routes } from '@angular/router';
-import { HomePage } from './home-page/home-page';
-import { booksPortalRoutes } from './books-portal/books-portal.routes';
-import { booksAdminRoutes } from './books-admin/books-admin.routes';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'home', component: HomePage, title: 'BookManager' },
-  ...booksPortalRoutes,
-  ...booksAdminRoutes,
+  { path: 'home', title: 'BookManager', loadComponent: () => import('./home-page/home-page').then(m => m.HomePage) },
+  {
+    path: 'books',
+    loadChildren: () => import('./books-portal/books-portal.routes').then(m => m.booksPortalRoutes),
+  },
+  {
+    path: 'admin',
+    loadChildren: () => import('./books-admin/books-admin.routes').then(m => m.booksAdminRoutes),
+  }
 ];

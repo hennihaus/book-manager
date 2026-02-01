@@ -65,9 +65,9 @@ describe('BookDetailsPage', () => {
     const location = TestBed.inject(Location);
     const router = TestBed.inject(Router);
 
-    await router.navigate(['/books/details/12345']);
+    await router.navigate(['/details/12345']);
 
-    expect(location.path()).toBe('/books/details/12345');
+    expect(location.path()).toBe('/details/12345');
   });
 
   it('should update book details when ISBN changes', async () => {

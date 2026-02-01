@@ -86,7 +86,7 @@ describe('BooksOverviewPage', () => {
   it('should load the BooksOverviewPage for /books', async () => {
     const harness = await RouterTestingHarness.create();
 
-    const component = await harness.navigateByUrl('/books', BooksOverviewPage);
+    const component = await harness.navigateByUrl('/', BooksOverviewPage);
 
     expect(component).toBeTruthy();
     expect(document.title).toBe('Books');
