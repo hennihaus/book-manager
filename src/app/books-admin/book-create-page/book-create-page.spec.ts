@@ -71,6 +71,7 @@ describe('BookCreatePage', () => {
   });
 
   it('shouold filter out empty authors data', () => {
+    component['bookForm']().value.set(validBook);
     component['bookForm'].authors().value.set(
       ['', 'Test Author', '']
     );
@@ -87,9 +88,60 @@ describe('BookCreatePage', () => {
   it('should navigate to created book', async () => {
     const location = TestBed.inject(Location);
 
+    component['bookForm']().value.set(validBook);
     component.submitForm();
     await fixture.whenStable();
 
     expect(location.path()).toBe('/books/details/1234567890123');
+  });
+
+  it('should not submit form data when form is invalid', () => {
+    component.submitForm();
+    expect(createFn).not.toHaveBeenCalled();
+  });
+
+  it('should validate ISBN field', () => {
+    const isbnState = component['bookForm'].isbn();
+
+    isbnState.markAsTouched();
+    expect(isbnState.errors()).toHaveLength(1);
+    expect(isbnState.errors()[0].kind).toBe('required');
+
+    isbnState.value.set('123456789012');
+    expect(isbnState.errors()).toHaveLength(1);
+    expect(isbnState.errors()[0].kind).toBe('minLength');
+
+    isbnState.value.set('12345678901234');
+    expect(isbnState.errors()).toHaveLength(1);
+    expect(isbnState.errors()[0].kind).toBe('maxLength');
+
+    isbnState.value.set('1234567890123');
+    expect(isbnState.errors()).toEqual([]);
+  });
+
+  it('should display an error message for a field and mark it as invalid', async () => {
+    const descriptionState = component['bookForm'].description();
+    const textareaEl = fixture.nativeElement.querySelector('textarea');
+    let textareaMessageEl = fixture.nativeElement.querySelector('#description-error');
+
+    expect(textareaEl.hasAttribute('aria-errormessage')).toBe(false);
+    expect(textareaEl.hasAttribute('aria-invalid')).toBe(false);
+    expect(textareaMessageEl).toBeNull();
+
+    descriptionState.markAsTouched();
+    await fixture.whenStable();
+
+    textareaMessageEl = fixture.nativeElement.querySelector('#description-error');
+    expect(textareaEl.getAttribute('aria-errormessage')).toBe('description-error');
+    expect(textareaEl.getAttribute('aria-invalid')).toBe('true');
+    expect(textareaMessageEl.textContent).toBe('Description is required.');
+
+    descriptionState.value.set('my description');
+    await fixture.whenStable();
+
+    textareaMessageEl = fixture.nativeElement.querySelector('#description-error');
+    expect(textareaEl.hasAttribute('aria-errormessage')).toBe(false);
+    expect(textareaEl.getAttribute('aria-invalid')).toBe('false');
+    expect(textareaMessageEl).toBeNull();
   });
 });
