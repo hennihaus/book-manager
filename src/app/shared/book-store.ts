@@ -10,9 +10,12 @@ export class BookStore {
   #http = inject(HttpClient);
   #apiUrl = 'https://api1.angular-buch.com';
 
-  getAll(): HttpResourceRef<Book[]> {
+  getAll(searchTerm: () => string): HttpResourceRef<Book[]> {
     return httpResource<Book[]>(
-      () => `${this.#apiUrl}/books`,
+      () => ({
+        url: `${this.#apiUrl}/books`,
+        params: { filter: searchTerm() }
+      }),
       { defaultValue: [] }
     );
   }

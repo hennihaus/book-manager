@@ -1,7 +1,8 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, effect, inject, input, linkedSignal, signal } from '@angular/core';
 import { Book } from '../../shared/book';
 import { BookCard } from '../book-card/book-card';
 import { BookStore } from '../../shared/book-store';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-books-overview-page',
@@ -11,24 +12,23 @@ import { BookStore } from '../../shared/book-store';
 })
 export class BooksOverviewPage {
   #bookStore = inject(BookStore);
+  #router = inject(Router);
 
-  protected searchTerm = signal('');
-  protected books = this.#bookStore.getAll();
+  readonly search = input<string>();
+
+  protected searchTerm = linkedSignal(() => this.search() || '');
+  protected books = this.#bookStore.getAll(() => this.searchTerm());
   protected likedBooks = signal<Book[]>([]);
 
-  protected filteredBooks = computed(() => {
-    if (!this.books.hasValue()) {
-      return [];
-    }
-
-    if (!this.searchTerm()) {
-      return this.books.value();
-    }
-
-    const term = this.searchTerm().toLowerCase();
-
-    return this.books.value().filter((b) => b.title.toLowerCase().includes(term));
-  })
+  constructor() {
+    effect(() => {
+      this.#router.navigate([], {
+        queryParams: {
+          search: this.searchTerm() || null
+        }
+      });
+    });
+  }
 
   addLikedBook(newLikedBook: Book) {
     const foundBook = this.likedBooks().find(

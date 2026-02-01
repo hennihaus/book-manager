@@ -1,16 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BooksOverviewPage } from './books-overview-page';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { booksPortalRoutes } from '../books-portal.routes';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { Book } from '../../shared/book';
 import { BookStore } from '../../shared/book-store';
-import { resource } from '@angular/core';
+import { inputBinding, resource, signal } from '@angular/core';
+import { Mock } from 'vitest';
 
 describe('BooksOverviewPage', () => {
   let component: BooksOverviewPage;
   let fixture: ComponentFixture<BooksOverviewPage>;
+  let getAllFn: Mock;
+  const searchSignal = signal<string | undefined>(undefined);
 
   const mockBooks: Partial<Book>[] = [
     { isbn: '1234', title: 'Tierisch gut kochen' },
@@ -18,6 +21,8 @@ describe('BooksOverviewPage', () => {
   ];
 
   beforeEach(async () => {
+    searchSignal.set(undefined);
+    getAllFn = vi.fn().mockResolvedValue(mockBooks);
     await TestBed.configureTestingModule({
       imports: [BooksOverviewPage],
       providers: [
@@ -25,8 +30,9 @@ describe('BooksOverviewPage', () => {
         {
           provide: BookStore,
           useFactory: () => ({
-            getAll: () => resource({
-              loader: () => Promise.resolve(mockBooks)
+            getAll: (searchTerm: () => string) => resource({
+              params: searchTerm,
+              loader: getAllFn,
             })
           })
         }
@@ -34,7 +40,9 @@ describe('BooksOverviewPage', () => {
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(BooksOverviewPage);
+    fixture = TestBed.createComponent(BooksOverviewPage, {
+      bindings: [inputBinding('search', searchSignal)]
+    });
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
@@ -75,37 +83,6 @@ describe('BooksOverviewPage', () => {
     expect(bookCardEls[1].textContent).toContain('Backen mit Affen');
   });
 
-  it('should display all books if the search term is empty', () => {
-    component['searchTerm'].set('');
-
-    const books = component['filteredBooks']();
-    expect(books).toHaveLength(2);
-  });
-
-  it('should filter books based on the search term', () => {
-    component['searchTerm'].set('Affe');
-
-    const books = component['filteredBooks']();
-    expect(books).toHaveLength(1);
-    expect(books[0].title).toBe('Backen mit Affen');
-  });
-
-  it('should filter books ignoring case sensitivity', () => {
-    component['searchTerm'].set('AFFEN');
-
-    const books = component['filteredBooks']();
-    expect(books).toHaveLength(1);
-    expect(books[0].title).toBe('Backen mit Affen');
-  });
-
-  it('should return an empty array if no book matches the search term', () => {
-    component['searchTerm'].set('unbekannter Titel');
-
-    const books = component['filteredBooks']();
-
-    expect(books).toHaveLength(0);
-  });
-
   it('should load the BooksOverviewPage for /books', async () => {
     const harness = await RouterTestingHarness.create();
 
@@ -114,4 +91,34 @@ describe('BooksOverviewPage', () => {
     expect(component).toBeTruthy();
     expect(document.title).toBe('Books');
   });
+
+  it('should ask service initially for books', () => {
+    expect(getAllFn).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ params: '' })
+    );
+
+    expect(component['searchTerm']()).toBe('');
+  });
+
+  it('should update searchTerm when query params change', async () => {
+    searchSignal.set('Angular');
+    await fixture.whenStable();
+
+    expect(getAllFn).toHaveBeenLastCalledWith(
+      expect.objectContaining({ params: 'Angular' })
+    );
+
+    expect(component['searchTerm']()).toBe('Angular');
+  });
+
+  it('should sync searchTerm to URL via Router', async () => {
+    const navigateSpy = vi.spyOn(TestBed.inject(Router), 'navigate');
+
+    component['searchTerm'].set('Angular');
+    await fixture.whenStable();
+
+    expect(navigateSpy).toHaveBeenCalledWith([], {
+      queryParams: { search: 'Angular' },
+    });
+  })
 });

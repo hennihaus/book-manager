@@ -36,11 +36,11 @@ describe('BookStore', () => {
 
     let booksResource!: HttpResourceRef<Book[]>;
     runInInjectionContext(injector, () => {
-      booksResource = service.getAll();
+      booksResource = service.getAll(() => '');
     });
     TestBed.tick();
 
-    const req = httpTesting.expectOne('https://api1.angular-buch.com/books');
+    const req = httpTesting.expectOne('https://api1.angular-buch.com/books?filter=');
     expect(req.request.method).toBe('GET');
     req.flush(mockBooks);
 
@@ -80,15 +80,27 @@ describe('BookStore', () => {
   it('should handle server errors', async () => {
     let booksResource!: HttpResourceRef<Book[]>;
     runInInjectionContext(injector, () => {
-      booksResource = service.getAll();
+      booksResource = service.getAll(() => '');
     });
     TestBed.tick();
 
-    const req = httpTesting.expectOne('https://api1.angular-buch.com/books');
+    const req = httpTesting.expectOne('https://api1.angular-buch.com/books?filter=');
     req.flush('Server error', { status: 500, statusText: 'Internal Server Error' });
 
     await TestBed.inject(ApplicationRef).whenStable();
     expect(booksResource.error()).toBeInstanceOf(HttpErrorResponse);
     expect((booksResource.error() as HttpErrorResponse).status).toBe(500);
+  });
+
+  it('should include search filter in HTTP request', () => {
+    runInInjectionContext(injector, () => {
+      service.getAll(() => 'Angular');
+    });
+
+    TestBed.tick();
+
+    httpTesting
+      .expectOne(r => r.params.get('filter') === 'Angular')
+      .flush([]);
   })
 });
