@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Book } from './book';
 import { HttpClient, httpResource, HttpResourceRef } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -25,5 +25,11 @@ export class BookStore {
 
   remove(isbn: string): Observable<void> {
     return this.#http.delete<void>(`${this.#apiUrl}/books/${isbn}`);
+  }
+
+  create(book: Book): Promise<Book> {
+    return firstValueFrom(
+      this.#http.post<Book>(`${this.#apiUrl}/books`, book)
+    );
   }
 }
