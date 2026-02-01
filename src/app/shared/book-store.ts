@@ -35,4 +35,11 @@ export class BookStore {
       this.#http.post<Book>(`${this.#apiUrl}/books`, book)
     );
   }
+
+  search(searchTerm: string): Observable<Book[]> {
+    return this.#http.get<Book[]>(
+      `${this.#apiUrl}/books`,
+      { params: { filter: searchTerm } }
+    )
+  }
 }
