@@ -12,6 +12,7 @@
 
 <section>
   <h1>Books</h1>
+  <button type="button" (click)="books.reload()" [aria-busy]="books.isLoading()">Reload</button>
   <div>
     <input
       type="search"

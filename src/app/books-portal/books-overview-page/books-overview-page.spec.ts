@@ -6,7 +6,7 @@ import { booksPortalRoutes } from '../books-portal.routes';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { Book } from '../../shared/book';
 import { BookStore } from '../../shared/book-store';
-import { of } from 'rxjs';
+import { resource } from '@angular/core';
 
 describe('BooksOverviewPage', () => {
   let component: BooksOverviewPage;
@@ -24,9 +24,11 @@ describe('BooksOverviewPage', () => {
         provideRouter(booksPortalRoutes),
         {
           provide: BookStore,
-          useValue: {
-            getAll: () => of(mockBooks)
-          }
+          useFactory: () => ({
+            getAll: () => resource({
+              loader: () => Promise.resolve(mockBooks)
+            })
+          })
         }
       ],
     })
@@ -42,7 +44,7 @@ describe('BooksOverviewPage', () => {
   });
 
   it('should have a list of 2 books with correct titles', () => {
-    const books = component['books']();
+    const books = component['books'].value();
 
     expect(books).toHaveLength(2);
     expect(books[0].title).toBe('Tierisch gut kochen');

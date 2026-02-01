@@ -1,7 +1,6 @@
-import { Component, effect, inject, input, signal } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { BookStore } from '../../shared/book-store';
 import { Router, RouterLink } from '@angular/router';
-import { Book } from '../../shared/book';
 
 @Component({
   selector: 'app-book-details-page',
@@ -16,15 +15,7 @@ export class BookDetailsPage {
   #router = inject(Router);
 
   readonly isbn = input.required<string>();
-  protected book = signal<Book | undefined>(undefined);
-
-  constructor() {
-    effect(() => {
-      this.#bookStore.getSingle(this.isbn()).subscribe(book => {
-        this.book.set(book);
-      });
-    });
-  }
+  protected book = this.#bookStore.getSingle(() => this.isbn());
 
   removeBook(isbn: string) {
     if (confirm('Delete book?')) {
