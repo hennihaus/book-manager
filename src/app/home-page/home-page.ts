@@ -21,7 +21,7 @@ export class HomePage {
   protected results = toSignal(
     this.searchTerm$.pipe(
       filter(term => term.length >= 3),
-      debounceTime(300),
+      debounceTime(500),
       distinctUntilChanged(),
       tap(() => this.isLoading.set(true)),
       switchMap(term => this.#bookStore.search(term)),

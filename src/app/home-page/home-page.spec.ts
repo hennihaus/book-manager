@@ -69,7 +69,7 @@ describe('HomePage', () => {
 
   it('should debounce search terms', () => {
     component['searchTerm$'].next('test1');
-    vi.advanceTimersByTime(299);
+    vi.advanceTimersByTime(300);
     component['searchTerm$'].next('test2');
     vi.advanceTimersByTime(500);
 
@@ -88,7 +88,7 @@ describe('HomePage', () => {
 
   it('should set loading state during search', () => {
     component['searchTerm$'].next('test');
-    vi.advanceTimersByTime(300);
+    vi.advanceTimersByTime(500);
 
     expect(component['isLoading']()).toBe(true);
     vi.advanceTimersByTime(100);
