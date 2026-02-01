@@ -1,11 +1,15 @@
 import { Component, inject, input } from '@angular/core';
 import { BookStore } from '../../shared/book-store';
 import { Router, RouterLink } from '@angular/router';
+import { DatePipe } from '@angular/common';
+import { IsbnFormatPipe } from '../../shared/isbn-format-pipe';
 
 @Component({
   selector: 'app-book-details-page',
   imports: [
-    RouterLink
+    RouterLink,
+    DatePipe,
+    IsbnFormatPipe,
   ],
   templateUrl: './book-details-page.html',
   styleUrl: './book-details-page.css',

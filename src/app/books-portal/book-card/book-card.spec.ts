@@ -44,8 +44,10 @@ describe('BookCard', () => {
   it('should render book title and isbn', () => {
     const compiledElement: HTMLElement = fixture.nativeElement;
 
-    expect(compiledElement.textContent).toContain(testBook().isbn);
-    expect(compiledElement.textContent).toContain(testBook().title);
+    const titleEl = compiledElement.querySelector('h2');
+    const isbnEl = compiledElement.querySelector('article > div');
+    expect(isbnEl?.textContent).toContain('123-4-5678-9012-3');
+    expect(titleEl?.textContent).toContain(testBook().title);
   });
 
   it('should display the correct image', () => {
